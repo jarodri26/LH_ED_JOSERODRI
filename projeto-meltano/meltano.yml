@@ -2,20 +2,49 @@ version: 1
 default_environment: dev
 project_id: 02c6853a-a56f-4fa4-a2ae-b13c92a4258e
 environments:
-  - name: dev
-  - name: staging
-  - name: prod
+- name: dev
+  config:
+    plugins:
+      loaders:
+      - name: target-csv
+        config:
+          output_path: ../data/postgres/order_details/2025-02-03/file.format
+      - name: target-postgres
+        variant: meltanolabs
+        pip_url: meltanolabs-target-postgres
+        config:
+          host: localhost
+          port: 5432
+          user: northwind_user
+          default_target_schema: public
+          database: northwind-final
+      extractors:
+      - name: tap-csv
+
+- name: prod
+  config:
+    plugins:
+      loaders:
+      - name: target-csv
+        config:
+          output_path: ../data/postgres/order_details/2025-02-03/file.format
+      extractors:
+      - name: tap-csv
+
 plugins:
   extractors:
     - name: tap-postgres
       variant: meltanolabs
       pip_url: git+https://github.com/MeltanoLabs/tap-postgres.git
       config:
-        host: ${FINAL_DB_HOST}
-        port: ${FINAL_DB_PORT}
+        host: localhost
+        port: 5432       
         user: northwind_user
         password: thewindisblowing
-        dbname: northwind
+        database: northwind
+        tables:
+          - orders
+          - order_details
     - name: tap-csv
       variant: meltanolabs
       pip_url: git+https://github.com/MeltanoLabs/tap-csv.git
@@ -26,16 +55,17 @@ plugins:
       variant: meltanolabs
       pip_url: git+https://github.com/MeltanoLabs/tap-postgres.git
       config:
-        host: ${FINAL_DB_HOST}
-        port: ${FINAL_DB_PORT}
+        host: localhost
+        port: 5434
         user: northwind_user
         password: thewindisblowing
-        dbname: northwind-final
+        database: northwind-final
     - name: target-csv
       variant: meltanolabs
       pip_url: git+https://github.com/MeltanoLabs/target-csv.git
       config:
-        destination_path: /project/output
+        output_path: ./data/csv/2025-02-03/file.format
+
 
 
 
